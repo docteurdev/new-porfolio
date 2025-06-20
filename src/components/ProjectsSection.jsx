@@ -1,4 +1,7 @@
-import { ArrowRight, ExternalLink, Github } from "lucide-react";
+import { ArrowRight, ExternalLink, Eye, Github } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import ImageSliderModal from "./ui/Modal";
 
 const projects = [
   {
@@ -7,8 +10,10 @@ const projects = [
     description: "The first legal matchmaking platform in Africa.",
     image: "/projects/alt.png",
     tags: ["Nuxt js", "TailwindCSS", "Express js", "MySQL"],
-    demoUrl: "#",
+    demoUrl: "https://altconnect.africa/",
     githubUrl: "#",
+    type: "web",
+    capture: []
   },
   {
     id: 2,
@@ -16,8 +21,10 @@ const projects = [
     description: "Official website of the company.",
     image: "/projects/cs-cap.png",
     tags: ["Nuxt js", "TailwindCSS", "Express js", "MySQL"],
-    demoUrl: "#",
+    demoUrl: "https://coumbassa-sanden.com/",
     githubUrl: "#",
+    type: "web",
+    capture: []
   },
   {
     id: 3,
@@ -27,27 +34,47 @@ const projects = [
     tags: ["Next js", "TailwindCSS", "Express js", "PostgreSQL"],
     demoUrl: "#",
     githubUrl: "#",
+    type: "web",
+    capture: []
   },
-  // {
-  //   id: 4,
-  //   title: "Meewa",
-  //   description:
-  //     "Interactive analytics dashboard with data visualization and filtering capabilities.",
-  //   image: "/projects/project2.png",
-  //   tags: ["TypeScript", "D3.js", "Next.js"],
-  //   demoUrl: "#",
-  //   githubUrl: "#",
-  // },
-  // {
-  //   id: 5,
-  //   title: "Coisa",
-  //   description:
-  //     "Interactive analytics dashboard with data visualization and filtering capabilities.",
-  //   image: "/projects/project2.png",
-  //   tags: ["TypeScript", "D3.js", "Next.js"],
-  //   demoUrl: "#",
-  //   githubUrl: "#",
-  // },
+  {
+    id: 4,
+    title: "Le Yoro de l'immo",
+    description:
+      "A mobile application for managing real estate listings and user interactions.",
+    image: "/leyoro-screen/icon.png",
+    tags: ["React native","Expo", "TypeScript"],
+    demoUrl: "#",
+    githubUrl: "#",
+    type: "mobile",
+    capture: []
+  },
+  {
+    id: 5,
+    title: "Toklo",
+    description:
+      "A mobile application for tailors, it helps them to manage their clients, appointments, sell creations and shocases thier work.",
+    image: "/toklo-screen/logo.jpg",
+    tags: ["React native", "Expo", "Tanstack query", "TypeScript"],
+    demoUrl: "#",
+    githubUrl: "#",
+    type: "mobile",
+    capture: [
+    "/toklo-screen/register.jpg", 
+    "/toklo-screen/login.jpg", 
+    "/toklo-screen/dash.jpg",
+    "/toklo-screen/measure.jpg",
+    "/toklo-screen/order.jpg",
+    "/toklo-screen/order-detail.jpg",
+    "/toklo-screen/client.jpg",
+    "/toklo-screen/client-detail.jpg",
+    "/toklo-screen/add-model.jpg",
+    "/toklo-screen/settings.jpg",
+    "/toklo-screen/notif.jpg",
+    "/toklo-screen/store-setting.jpg",
+    "/toklo-screen/subscription.jpg",
+  ]
+  },
   // {
   //   id: 6,
   //   title: "Cst",
@@ -60,9 +87,31 @@ const projects = [
   // },
 ];
 
+const categories = ["all", "mobile", "web", ""];
+
+
 export const ProjectsSection = () => {
+
+   const [activeCategory, setActiveCategory] = useState("all");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedProject, setSelectedProject] = useState([]);
+  
+    const filteredProjects = projects.filter(
+      (skill) => activeCategory === "all" || skill.type === activeCategory
+    );
+
+    // console.log("++++++++++++++++++++++++++", projects);
+
   return (
     <section id="projects" className="py-24 px-4 relative">
+      <ImageSliderModal
+        images={selectedProject}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        initialIndex={selectedImageIndex}
+      />
       <div className="container mx-auto max-w-5xl">
         <h2 className="text-3xl md:text-4xl font-bold mb-4 text-center">
           {" "}
@@ -74,8 +123,25 @@ export const ProjectsSection = () => {
           crafted with attention to detail, performance, and user experience.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((project, key) => (
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
+                  {categories.map((category, key) => (
+                    <button
+                      key={key}
+                      onClick={() => setActiveCategory(category)}
+                      className={cn(
+                        "px-5 py-2 rounded-full transition-colors duration-300 capitalize",
+                        activeCategory === category
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary/70 text-forefround hover:bd-secondary"
+                      )}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-8">
+          {filteredProjects?.map((project, key) => (
             <div
               key={key}
               className="group bg-card rounded-lg overflow-hidden shadow-xs card-hover"
@@ -91,7 +157,7 @@ export const ProjectsSection = () => {
               <div className="p-6">
                 <div className="flex flex-wrap gap-2 mb-4">
                   {project.tags.map((tag) => (
-                    <span className="px-2 py-1 text-xs font-medium border rounded-full bg-secondary text-secondary-foreground">
+                    <span key={tag} className="px-2 py-1 text-xs font-medium border rounded-full bg-secondary text-secondary-foreground">
                       {tag}
                     </span>
                   ))}
@@ -117,6 +183,17 @@ export const ProjectsSection = () => {
                     >
                       <Github size={20} />
                     </a>
+
+                   {project?.capture.length > 0 && <a
+                      onClick={() => {
+                        if(!project.capture || project.capture.length === 0) return;
+                        setSelectedProject(project.capture || []);
+                        setIsModalOpen(true)
+                      }}
+                      className="text-foreground/80 hover:text-primary transition-colors duration-300"
+                    >
+                      <Eye size={20} />
+                    </a>}
                   </div>
                 </div>
               </div>

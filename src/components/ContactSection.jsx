@@ -12,23 +12,57 @@ import {
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-
+import { emailServer } from "../../service/apis";
+import axios from "axios";
 export const ContactSection = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [subject, setSubject] = useState("");
+  
+  
 
+
+  const handleSubmit = async(e) => {
+    e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      toast({
-        title: "Message sent!",
-        description: "Thank you for your message. I'll get back to you soon.",
-      });
+    const dd =  {
+      name,
+      subject,
+      mgs: message,
+      email
+    }
+     try {
+     const resp = await  axios.post(emailServer, dd);
+
+     if(resp.data){
+
+       setTimeout(() => {
+       toast({
+         title: "Message sent!",
+         description: "Thank you for your message. I'll get back to you soon.",
+       }) })
+
+      }
+     } catch (error) {
+       
+       toast({
+         title: "Error",
+         description: "Something went wrong. Please try again later.",
+       })
+     }finally {
       setIsSubmitting(false);
-    }, 1500);
+      setName("");
+      setSubject("");
+      setMessage("");
+      setEmail("");
+     }
+     
+    
   };
   return (
     <section id="contact" className="py-24 px-4 relative bg-secondary/30">
@@ -129,6 +163,8 @@ export const ContactSection = () => {
                   type="text"
                   id="name"
                   name="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   required
                   className="w-full px-4 py-3 rounded-md border border-input bg-background focus:outline-hidden foucs:ring-2 focus:ring-primary"
                   placeholder="Omar Adje..."
@@ -147,6 +183,8 @@ export const ContactSection = () => {
                   type="email"
                   id="email"
                   name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full px-4 py-3 rounded-md border border-input bg-background focus:outline-hidden foucs:ring-2 focus:ring-primary"
                   placeholder="omar.adje5@gmail.com"
@@ -158,12 +196,14 @@ export const ContactSection = () => {
                   htmlFor="message"
                   className="block text-sm font-medium mb-2"
                 >
-                  {" "}
+                  {" "} 
                   Your Message
                 </label>
                 <textarea
                   id="message"
                   name="message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
                   required
                   className="w-full px-4 py-3 rounded-md border border-input bg-background focus:outline-hidden foucs:ring-2 focus:ring-primary resize-none"
                   placeholder="Hello, I'd like to talk about..."
